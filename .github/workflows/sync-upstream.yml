@@ -3,7 +3,6 @@ name: Sync Upstream
 
 on:
   schedule:
-    # 每天 UTC 时间凌晨 2 点执行
     - cron: "0 2 * * *"
   workflow_dispatch:
 
@@ -21,24 +20,25 @@ jobs:
           ref: main
           fetch-depth: 0
 
-      - name: Configure Git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-      - name: Add upstream
-        run: |
-          git remote remove upstream || true
-          git remote add upstream https://github.com/AEtherside/skland-daily-attendance.git
-
       - name: Fetch upstream
         run: |
+          git remote add upstream https://github.com/AEtherside/skland-daily-attendance.git
           git fetch upstream main
 
-      - name: Merge upstream
+      - name: Sync upstream files
         run: |
-          git merge --no-edit upstream/main
+          git rm -r --ignore-unmatch .
+          git checkout upstream/main -- .
+          git add -A
+          git reset -- .github/workflows/sync-upstream.yml
 
-      - name: Push changes
+      - name: Commit changes
         run: |
-          git push origin main
+          if git diff --cached --quiet; then
+            echo "Already up to date"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "Sync upstream"
+            git push origin main
+          fi
