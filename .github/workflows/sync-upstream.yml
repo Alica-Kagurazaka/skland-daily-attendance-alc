@@ -16,7 +16,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: main
           fetch-depth: 0
@@ -28,7 +28,8 @@ jobs:
 
       - name: Add upstream
         run: |
-          git remote add upstream git@github.com:AEtherside/skland-daily-attendance.git
+          git remote remove upstream || true
+          git remote add upstream https://github.com/AEtherside/skland-daily-attendance.git
 
       - name: Fetch upstream
         run: |
